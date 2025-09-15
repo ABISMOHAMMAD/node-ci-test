@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent any   
 
     environment {
         IMAGE_NAME = "abismohammad/my-node-ci"
@@ -12,18 +12,16 @@ pipeline {
             }
         }
 
-
-    
-
-        stage('Debug') {
-           steps {
-               sh 'echo $PATH && which node && node -v && npm -v'
-            }
-        }
-
         stage('Install & Test') {
+            agent {
+                docker {
+                    image 'node:22-alpine'
+                }
+            }
             steps {
                 sh '''
+                  node -v
+                  npm -v
                   npm install
                   npm test
                 '''
