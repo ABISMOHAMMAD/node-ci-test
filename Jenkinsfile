@@ -1,5 +1,5 @@
-ipipeline {
-    agent any   // default agent for Docker build/push stages
+pipeline {
+    agent any
 
     environment {
         IMAGE_NAME = "abismohammad/my-node-ci"
@@ -7,22 +7,12 @@ ipipeline {
 
     stages {
         stage('Clone') {
-            agent {
-                docker {
-                    image 'node:22-alpine'
-                }
-            }
             steps {
                 git branch: 'main', url: 'https://github.com/ABISMOHAMMAD/node-ci-test.git'
             }
         }
 
         stage('Install & Test') {
-            agent {
-                docker {
-                    image 'node:22-alpine'
-                }
-            }
             steps {
                 sh '''
                   npm install
