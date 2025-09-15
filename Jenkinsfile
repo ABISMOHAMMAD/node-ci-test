@@ -12,6 +12,15 @@ pipeline {
             }
         }
 
+
+    
+
+        stage('Debug') {
+           steps {
+               sh 'echo $PATH && which node && node -v && npm -v'
+            }
+        }
+
         stage('Install & Test') {
             steps {
                 sh '''
