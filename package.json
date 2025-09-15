@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "jest --coverage"
+    "test": "jest --coverage --detectOpenHandles --forceExit"
   },
   "dependencies": {
     "express": "^4.18.2"
