@@ -63,7 +63,7 @@ pipeline {
 
                         sh """
                           # Update image tag in deployment.yaml
-                          sed -i '' 's|image: docker.io/$IMAGE_NAME:.*|image: docker.io/$IMAGE_NAME:${COMMIT_HASH}|' deployment.yaml
+                          sed -i '' 's|image: docker.io/$IMAGE_NAME:.*|image: docker.io/$IMAGE_NAME:${COMMIT_HASH}|' k8s/deployment.yaml
 
                           git config user.email "jenkins@ci"
                           git config user.name "Jenkins"
