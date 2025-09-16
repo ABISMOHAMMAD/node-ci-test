@@ -6,7 +6,7 @@ pipeline {
     }
 
     stages {
-        stage('Clone') {
+        stage('Clone App Repo') {
             steps {
                 git branch: 'main', url: 'https://github.com/ABISMOHAMMAD/node-ci-test.git'
             }
@@ -27,47 +27,52 @@ pipeline {
         stage('Build & Push Docker Image') {
             steps {
                 script {
-                    // Get short commit hash
-                    def GIT_COMMIT_SHORT = sh(
+                    // Short Git commit hash for tagging
+                    def commitHash = sh(
                         script: 'git rev-parse --short HEAD',
                         returnStdout: true
                     ).trim()
 
-                    echo "Tagging image as ${GIT_COMMIT_SHORT}"
+                    echo "Building Docker image with tag: ${commitHash}"
 
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                         sh """
                           echo $PASS | docker login -u $USER --password-stdin
 
-                          # Build image with commit hash and latest
-                          docker build -t docker.io/$IMAGE_NAME:${GIT_COMMIT_SHORT} -t docker.io/$IMAGE_NAME:latest .
+                          # Build and tag
+                          docker build -t docker.io/$IMAGE_NAME:${commitHash} .
 
                           # Push both tags
-                          docker push docker.io/$IMAGE_NAME:${GIT_COMMIT_SHORT}
-                          docker push docker.io/$IMAGE_NAME:latest
-
-                          # Update secret in Kubernetes
-                          kubectl delete secret dockerhub-secret -n default --ignore-not-found
-                          kubectl create secret docker-registry dockerhub-secret \
-                            --docker-server=https://index.docker.io/v1/ \
-                            --docker-username=$USER \
-                            --docker-password=$PASS \
-                            --docker-email=dummy@example.com \
-                            -n default
+                          docker push docker.io/$IMAGE_NAME:${commitHash}
                         """
                     }
+
+                    // Save commitHash for next stage
+                    env.COMMIT_HASH = commitHash
                 }
             }
         }
 
-        stage('Deploy to Minikube') {
+        stage('Update Manifests Repo') {
             steps {
-                sh '''
-                  kubectl config use-context minikube
-                  kubectl apply -f k8s/deployment.yaml
-                  kubectl apply -f k8s/service.yaml
-                  kubectl rollout status deployment/my-node-app -n default --timeout=60s
-                '''
+                script {
+                    dir('manifests-repo') {
+                        git branch: 'main',
+                            url: 'https://github.com/ABISMOHAMMAD/node-ci-k8s-manifests.git',
+                            credentialsId: 'github-creds'
+
+                        sh """
+                          # Update image tag in deployment.yaml
+                          sed -i 's|image: docker.io/$IMAGE_NAME:.*|image: docker.io/$IMAGE_NAME:${COMMIT_HASH}|' deployment.yaml
+
+                          git config user.email "jenkins@ci"
+                          git config user.name "Jenkins"
+                          git add deployment.yaml
+                          git commit -m "Update image to ${COMMIT_HASH}" || echo "No changes to commit"
+                          git push origin main
+                        """
+                    }
+                }
             }
         }
     }
