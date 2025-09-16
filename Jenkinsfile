@@ -67,7 +67,7 @@ pipeline {
 
                           git config user.email "jenkins@ci"
                           git config user.name "Jenkins"
-                          git add deployment.yaml
+                          git add k8s/deployment.yaml
                           git commit -m "Update image to ${COMMIT_HASH}" || echo "No changes to commit"
                           git push origin main
                         """
