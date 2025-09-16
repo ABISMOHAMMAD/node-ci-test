@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: my-node-app
-        image: docker.io/abismohammad/my-node-ci:latest
+        image: docker.io/abismohammad/my-node-ci:41aefc5
         ports:
         - containerPort: 3000
       imagePullSecrets:
