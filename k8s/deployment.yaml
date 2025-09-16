@@ -18,5 +18,5 @@ spec:
         image: docker.io/abismohammad/my-node-ci:latest
         ports:
         - containerPort: 3000
-        imagePullSecrets:
-        - name: dockerhub-secret
+      imagePullSecrets:
+      - name: dockerhub-secret
