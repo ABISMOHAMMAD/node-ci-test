@@ -58,7 +58,7 @@ pipeline {
                 script {
                     dir('manifests-repo') {
                         git branch: 'main',
-                            url: 'https://github.com/ABISMOHAMMAD/node-ci-k8s-manifests.git',
+                            url: 'https://github.com/ABISMOHAMMAD/node-ci-test.git',
                             credentialsId: 'github-creds'
 
                         sh """
