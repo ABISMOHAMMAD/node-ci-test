@@ -19,12 +19,8 @@ pipeline {
                 }
             }
             steps {
-                sh '''
-                  node -v
-                  npm -v
-                  npm install
-                  npm test
-                '''
+                  sh 'npm install'
+                  sh 'npm test'
             }
         }
 
